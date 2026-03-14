@@ -9,6 +9,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 text-white p-4 flex items-center justify-between">
       <div className="flex gap-6">
+      <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
         <Link href="/" className="hover:text-gray-300">Ana Sayfa</Link>
         <Link href="/pos" className="hover:text-gray-300">POS</Link>
         <Link href="/urunler" className="hover:text-gray-300">Ürünler</Link>
