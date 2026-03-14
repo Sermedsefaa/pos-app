@@ -1,0 +1,71 @@
+"use client"
+
+import { useState } from "react"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
+
+export default function GirisPage() {
+  const [form, setForm] = useState({ username: "", password: "" })
+  const [hata, setHata] = useState("")
+  const [yukleniyor, setYukleniyor] = useState(false)
+  const router = useRouter()
+
+  async function girisYap() {
+    if (!form.username || !form.password) return
+    setYukleniyor(true)
+    setHata("")
+
+    const sonuc = await signIn("credentials", {
+      username: form.username,
+      password: form.password,
+      redirect: false,
+    })
+
+    if (sonuc.ok) {
+      router.push("/pos")
+    } else {
+      setHata("Kullanıcı adı veya şifre hatalı.")
+    }
+
+    setYukleniyor(false)
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 w-full max-w-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Giriş Yap
+        </h1>
+
+        <div className="flex flex-col gap-3">
+          <input
+            className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            placeholder="Kullanıcı adı"
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+          />
+          <input
+            className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            placeholder="Şifre"
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && girisYap()}
+          />
+
+          {hata && (
+            <p className="text-red-500 text-sm">{hata}</p>
+          )}
+
+          <button
+            onClick={girisYap}
+            disabled={yukleniyor}
+            className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
+          >
+            {yukleniyor ? "Giriş yapılıyor..." : "Giriş Yap"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
