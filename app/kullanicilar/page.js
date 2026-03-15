@@ -76,7 +76,6 @@ export default function KullanicilarPage() {
         Kullanıcılar
       </h1>
 
-      {/* Yeni kullanıcı formu */}
       <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-8 flex flex-col gap-3">
         <h2 className="font-medium text-gray-900 dark:text-gray-100">
           Yeni Kullanıcı Ekle
@@ -118,7 +117,6 @@ export default function KullanicilarPage() {
         </button>
       </div>
 
-      {/* Kullanıcı listesi */}
       <div className="flex flex-col gap-2">
         {kullanicilar.map((k) => (
           <div
@@ -137,7 +135,7 @@ export default function KullanicilarPage() {
                 {k.rol}
               </span>
             </div>
-            {k.id !== session.user.id && (
+            {k.id !== session?.user?.id && (
               <button
                 onClick={() => kullaniciSil(k.id)}
                 className="text-sm text-red-500 hover:text-red-700 px-3 py-1 rounded-lg border border-red-200 hover:border-red-400 transition-colors"

@@ -24,19 +24,6 @@ export async function POST(request) {
   if (session.user.rol !== "sahip") return Response.json({ hata: "Yetkisiz" }, { status: 403 })
 
   const body = await request.json()
-
-  // Aynı isletmede aynı kullanıcı adı var mı?
-  const { data: mevcutKullanici } = await supabase
-    .from("kullanicilar")
-    .select("id")
-    .eq("kullanici_adi", body.kullanici_adi)
-    .eq("isletme_id", session.user.isletmeId)
-    .single()
-
-  if (mevcutKullanici) {
-    return Response.json({ hata: "Bu kullanıcı adı zaten kullanılıyor" }, { status: 400 })
-  }
-
   const sifreHash = await bcrypt.hash(body.sifre, 10)
 
   const { data, error } = await supabase
@@ -48,7 +35,7 @@ export async function POST(request) {
       isletme_id: session.user.isletmeId,
       aktif: true,
     }])
-    .select("id, kullanici_adi, rol")
+    .select("id, kullanici_adi, rol, aktif")
     .single()
 
   if (error) return Response.json({ hata: error.message }, { status: 500 })
