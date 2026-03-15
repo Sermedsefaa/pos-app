@@ -14,25 +14,22 @@ export default function PosPage() {
   const [kaydediliyor, setKaydediliyor] = useState(false)
   const [sonuc, setSonuc] = useState(null)
   const [secilenKategori, setSecilenKategori] = useState("Tümü")
+  const [odemeModal, setOdemeModal] = useState(false)
+  const [alinanPara, setAlinanPara] = useState("")
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/giris")
   }, [status, router])
 
- useEffect(() => {
-  if (status === "authenticated") {
-    fetch("/api/urunler")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setUrunler(data)
-        } else {
-          console.error("Urunler hatasi:", data)
-          setUrunler([])
-        }
-      })
-  }
-}, [status])
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetch("/api/urunler")
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data)) setUrunler(data)
+        })
+    }
+  }, [status])
 
   const kategoriler = [
     t.tumKategoriler,
@@ -72,9 +69,12 @@ export default function PosPage() {
   }
 
   const toplam = sepet.reduce((acc, k) => acc + k.fiyat * k.adet, 0)
+  const paraUstu = alinanPara ? Number(alinanPara) - toplam : 0
 
   async function siparisKaydet() {
     if (sepet.length === 0) return
+    if (Number(alinanPara) < toplam) return
+
     setKaydediliyor(true)
     setSonuc(null)
 
@@ -86,6 +86,8 @@ export default function PosPage() {
 
     if (res.ok) {
       setSepet([])
+      setOdemeModal(false)
+      setAlinanPara("")
       setSonuc(t.siparisKaydedildi)
     } else {
       setSonuc(t.hataOlustu)
@@ -101,6 +103,8 @@ export default function PosPage() {
 
   return (
     <div className="flex gap-6 h-screen p-6">
+
+      {/* Sol: Ürünler */}
       <div className="flex-1 flex flex-col">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
           {t.urunler}
@@ -141,6 +145,7 @@ export default function PosPage() {
         </div>
       </div>
 
+      {/* Sağ: Sepet */}
       <div className="w-80 border-l border-gray-200 dark:border-gray-700 pl-6 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -191,20 +196,88 @@ export default function PosPage() {
             <span>{t.toplam}</span>
             <span>{toplam.toLocaleString()} IQD</span>
           </div>
+
           {sonuc && (
-            <div className={`text-sm mb-3 text-center font-medium ${sonuc.startsWith("✓") ? "text-green-600" : "text-red-500"}`}>
+            <div className={`text-sm mb-3 text-center font-medium ${
+              sonuc.startsWith("✓") ? "text-green-600" : "text-red-500"
+            }`}>
               {sonuc}
             </div>
           )}
+
           <button
-            onClick={siparisKaydet}
-            disabled={sepet.length === 0 || kaydediliyor}
+            onClick={() => setOdemeModal(true)}
+            disabled={sepet.length === 0}
             className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
           >
-            {kaydediliyor ? t.kaydediliyor : t.siparisiTamamla}
+            {t.siparisiTamamla}
           </button>
         </div>
       </div>
+
+      {/* Ödeme Modalı */}
+      {odemeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm mx-4">
+            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
+              Ödeme Al
+            </h3>
+
+            <div className="flex justify-between mb-4 text-gray-700 dark:text-gray-300">
+              <span>Tutar</span>
+              <span className="font-bold">{toplam.toLocaleString()} IQD</span>
+            </div>
+
+            <input
+              className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-lg mb-3"
+              placeholder="Alınan para"
+              type="number"
+              value={alinanPara}
+              onChange={(e) => setAlinanPara(e.target.value)}
+              autoFocus
+            />
+
+            {alinanPara && Number(alinanPara) >= toplam && (
+              <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4 flex justify-between">
+                <span className="text-green-700 dark:text-green-300 font-medium">
+                  Para üstü
+                </span>
+                <span className="text-green-700 dark:text-green-300 font-bold">
+                  {(Number(alinanPara) - toplam).toLocaleString()} IQD
+                </span>
+              </div>
+            )}
+
+            {alinanPara && Number(alinanPara) < toplam && (
+              <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-3 mb-4">
+                <span className="text-red-600 dark:text-red-300 text-sm">
+                  Yetersiz tutar — {(toplam - Number(alinanPara)).toLocaleString()} IQD eksik
+                </span>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setOdemeModal(false)
+                  setAlinanPara("")
+                }}
+                className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                İptal
+              </button>
+              <button
+                onClick={siparisKaydet}
+                disabled={!alinanPara || Number(alinanPara) < toplam || kaydediliyor}
+                className="flex-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg p-3 font-medium hover:opacity-80 disabled:opacity-40"
+              >
+                {kaydediliyor ? t.kaydediliyor : "Onayla"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
