@@ -1,33 +1,40 @@
 import { supabase } from "@/lib/supabase"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session) return Response.json({ hata: "Yetkisiz" }, { status: 401 })
+
   const { data, error } = await supabase
     .from("siparisler")
     .select("*")
+    .eq("isletme_id", session.user.isletmeId)
     .order("created_at", { ascending: false })
     .limit(50)
 
-  if (error) {
-    return Response.json({ hata: error.message }, { status: 500 })
-  }
-
+  if (error) return Response.json({ hata: error.message }, { status: 500 })
   return Response.json(data)
 }
 
 export async function POST(request) {
+  const session = await getServerSession(authOptions)
+  if (!session) return Response.json({ hata: "Yetkisiz" }, { status: 401 })
+
   const body = await request.json()
-  // Önce siparişi kaydet
+
   const { data: siparis, error: siparisHata } = await supabase
     .from("siparisler")
-    .insert([{ toplam: body.toplam, notlar: body.notlar || "" }])
+    .insert([{
+      toplam: body.toplam,
+      notlar: body.notlar || "",
+      isletme_id: session.user.isletmeId,
+    }])
     .select()
     .single()
 
-  if (siparisHata) {
-    return Response.json({ hata: siparisHata.message }, { status: 500 })
-  }
+  if (siparisHata) return Response.json({ hata: siparisHata.message }, { status: 500 })
 
-  // Sonra kalemleri kaydet
   const kalemler = body.kalemler.map((k) => ({
     siparis_id: siparis.id,
     urun_id: k.id,
@@ -40,9 +47,6 @@ export async function POST(request) {
     .from("siparis_kalemleri")
     .insert(kalemler)
 
-  if (kalemHata) {
-    return Response.json({ hata: kalemHata.message }, { status: 500 })
-  }
-
+  if (kalemHata) return Response.json({ hata: kalemHata.message }, { status: 500 })
   return Response.json(siparis, { status: 201 })
 }

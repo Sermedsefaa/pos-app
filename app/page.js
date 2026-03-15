@@ -30,7 +30,7 @@ export default function HomePage() {
   return (
     <div className="p-8 max-w-3xl" dir={rtl ? "rtl" : "ltr"}>
       <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">
-        {t.dashboard}
+         {veri?.isletmeAdi} — {t.dashboard}
       </h1>
 
       <div className="grid grid-cols-2 gap-4 mb-10">

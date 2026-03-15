@@ -19,13 +19,20 @@ export default function PosPage() {
     if (status === "unauthenticated") router.push("/giris")
   }, [status, router])
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/urunler")
-        .then((r) => r.json())
-        .then(setUrunler)
-    }
-  }, [status])
+ useEffect(() => {
+  if (status === "authenticated") {
+    fetch("/api/urunler")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setUrunler(data)
+        } else {
+          console.error("Urunler hatasi:", data)
+          setUrunler([])
+        }
+      })
+  }
+}, [status])
 
   const kategoriler = [
     t.tumKategoriler,
