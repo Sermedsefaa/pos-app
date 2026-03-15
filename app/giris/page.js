@@ -3,8 +3,10 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useDil } from "../components/DilContext"
 
 export default function GirisPage() {
+  const { t } = useDil()
   const [form, setForm] = useState({ username: "", password: "" })
   const [hata, setHata] = useState("")
   const [yukleniyor, setYukleniyor] = useState(false)
@@ -24,7 +26,7 @@ export default function GirisPage() {
     if (sonuc.ok) {
       router.push("/pos")
     } else {
-      setHata("Kullanıcı adı veya şifre hatalı.")
+      setHata(t.hataliGiris)
     }
 
     setYukleniyor(false)
@@ -34,35 +36,30 @@ export default function GirisPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 w-full max-w-sm">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Giriş Yap
+          {t.giris}
         </h1>
-
         <div className="flex flex-col gap-3">
           <input
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            placeholder="Kullanıcı adı"
+            placeholder={t.kullaniciAdi}
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
           />
           <input
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            placeholder="Şifre"
+            placeholder={t.sifre}
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             onKeyDown={(e) => e.key === "Enter" && girisYap()}
           />
-
-          {hata && (
-            <p className="text-red-500 text-sm">{hata}</p>
-          )}
-
+          {hata && <p className="text-red-500 text-sm">{hata}</p>}
           <button
             onClick={girisYap}
             disabled={yukleniyor}
             className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
           >
-            {yukleniyor ? "Giriş yapılıyor..." : "Giriş Yap"}
+            {yukleniyor ? t.girisYapiliyor : t.giris}
           </button>
         </div>
       </div>

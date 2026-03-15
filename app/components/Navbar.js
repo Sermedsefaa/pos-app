@@ -2,31 +2,44 @@
 
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
+import { useDil } from "./DilContext"
 
 export default function Navbar() {
   const { data: session } = useSession()
+  const { dil, setDil, t } = useDil()
 
   return (
-    <nav className="bg-gray-900 text-white p-4 flex items-center justify-between">
-      <div className="flex gap-6">
-      <img src="/logo.png" alt="Logo" className="h-8 w-auto"  style={{ height: "35px", width: "auto" }}/>
-        <Link href="/" className="hover:text-gray-300">Ana Sayfa</Link>
-        <Link href="/pos" className="hover:text-gray-300">POS</Link>
-        <Link href="/urunler" className="hover:text-gray-300">Ürünler</Link>
-        <Link href="/siparisler" className="hover:text-gray-300">Siparişler</Link>
+    <nav
+      className="bg-gray-900 text-white p-4 flex items-center justify-between"
+      dir={dil === "ar" ? "rtl" : "ltr"}
+    >
+      <div className="flex gap-6 items-center">
+        <img src="/logo.png" alt="Logo" style={{ height: "40px", width: "auto" }} />
+        <Link href="/" className="hover:text-gray-300">{t.anaSayfa}</Link>
+        <Link href="/pos" className="hover:text-gray-300">{t.pos}</Link>
+        <Link href="/urunler" className="hover:text-gray-300">{t.urunler}</Link>
+        <Link href="/siparisler" className="hover:text-gray-300">{t.siparisler}</Link>
       </div>
 
-      <div>
+      <div className="flex items-center gap-4">
+        {/* Dil seçici */}
+        <button
+          onClick={() => setDil(dil === "tr" ? "ar" : "tr")}
+          className="text-xs border border-gray-600 rounded-lg px-3 py-1.5 hover:border-gray-400 transition-colors"
+        >
+          {dil === "tr" ? "العربية" : "Türkçe"}
+        </button>
+
         {session ? (
           <button
             onClick={() => signOut({ callbackUrl: "/giris" })}
             className="text-gray-300 hover:text-white text-sm"
           >
-            Çıkış Yap
+            {t.cikisYap}
           </button>
         ) : (
           <Link href="/giris" className="text-gray-300 hover:text-white text-sm">
-            Giriş Yap
+            {t.girisYap}
           </Link>
         )}
       </div>

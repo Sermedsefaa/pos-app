@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useDil } from "../components/DilContext"
 
 export default function PosPage() {
   const { status } = useSession()
   const router = useRouter()
+  const { t } = useDil()
   const [urunler, setUrunler] = useState([])
   const [sepet, setSepet] = useState([])
   const [kaydediliyor, setKaydediliyor] = useState(false)
@@ -14,9 +16,7 @@ export default function PosPage() {
   const [secilenKategori, setSecilenKategori] = useState("Tümü")
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/giris")
-    }
+    if (status === "unauthenticated") router.push("/giris")
   }, [status, router])
 
   useEffect(() => {
@@ -27,15 +27,13 @@ export default function PosPage() {
     }
   }, [status])
 
-  // Benzersiz kategorileri çıkar
   const kategoriler = [
-    "Tümü",
+    t.tumKategoriler,
     ...new Set(urunler.map((u) => u.kategori).filter(Boolean)),
   ]
 
-  // Filtrelenmiş ürünler
   const filtreliUrunler =
-    secilenKategori === "Tümü"
+    secilenKategori === t.tumKategoriler
       ? urunler
       : urunler.filter((u) => u.kategori === secilenKategori)
 
@@ -54,9 +52,7 @@ export default function PosPage() {
   function sepettenCikar(urunId) {
     setSepet((onceki) => {
       const kalem = onceki.find((k) => k.id === urunId)
-      if (kalem.adet === 1) {
-        return onceki.filter((k) => k.id !== urunId)
-      }
+      if (kalem.adet === 1) return onceki.filter((k) => k.id !== urunId)
       return onceki.map((k) =>
         k.id === urunId ? { ...k, adet: k.adet - 1 } : k
       )
@@ -64,7 +60,7 @@ export default function PosPage() {
   }
 
   function sepetiBosalt() {
-    if (!confirm("Sepeti temizlemek istediğine emin misin?")) return
+    if (!confirm(t.sepetTemizle)) return
     setSepet([])
   }
 
@@ -83,9 +79,9 @@ export default function PosPage() {
 
     if (res.ok) {
       setSepet([])
-      setSonuc("✓ Sipariş kaydedildi")
+      setSonuc(t.siparisKaydedildi)
     } else {
-      setSonuc("✗ Bir hata oluştu")
+      setSonuc(t.hataOlustu)
     }
 
     setKaydediliyor(false)
@@ -93,19 +89,15 @@ export default function PosPage() {
   }
 
   if (status === "loading" || status === "unauthenticated") {
-    return <div className="p-8 text-gray-500">Yükleniyor...</div>
+    return <div className="p-8 text-gray-500">{t.yukleniyor}</div>
   }
 
   return (
     <div className="flex gap-6 h-screen p-6">
-
-      {/* Sol: Ürünler */}
       <div className="flex-1 flex flex-col">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-          Ürünler
+          {t.urunler}
         </h2>
-
-        {/* Kategori filtreleri */}
         <div className="flex gap-2 mb-4 flex-wrap">
           {kategoriler.map((kategori) => (
             <button
@@ -121,8 +113,6 @@ export default function PosPage() {
             </button>
           ))}
         </div>
-
-        {/* Ürün grid */}
         <div className="grid grid-cols-2 gap-3 overflow-y-auto">
           {filtreliUrunler.map((urun) => (
             <button
@@ -134,9 +124,7 @@ export default function PosPage() {
                 {urun.ad}
               </div>
               {urun.kategori && (
-                <div className="text-xs text-gray-400 mt-0.5">
-                  {urun.kategori}
-                </div>
+                <div className="text-xs text-gray-400 mt-0.5">{urun.kategori}</div>
               )}
               <div className="text-gray-600 dark:text-gray-400 mt-1 font-medium">
                 {urun.fiyat} IQD
@@ -146,31 +134,27 @@ export default function PosPage() {
         </div>
       </div>
 
-      {/* Sağ: Sepet */}
       <div className="w-80 border-l border-gray-200 dark:border-gray-700 pl-6 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            Sepet
+            {t.sepet}
           </h2>
           {sepet.length > 0 && (
             <button
               onClick={sepetiBosalt}
               className="text-xs text-red-400 hover:text-red-600"
             >
-              Temizle
+              {t.temizle}
             </button>
           )}
         </div>
 
         {sepet.length === 0 ? (
-          <p className="text-gray-400 text-sm">Henüz ürün eklenmedi</p>
+          <p className="text-gray-400 text-sm">{t.henuzUrunYok}</p>
         ) : (
           <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
             {sepet.map((kalem) => (
-              <div
-                key={kalem.id}
-                className="flex justify-between items-center"
-              >
+              <div key={kalem.id} className="flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
                     {kalem.ad}
@@ -195,33 +179,25 @@ export default function PosPage() {
           </div>
         )}
 
-        {/* Toplam ve kaydet */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
           <div className="flex justify-between font-bold text-lg mb-4 text-gray-900 dark:text-gray-100">
-            <span>Toplam</span>
+            <span>{t.toplam}</span>
             <span>{toplam.toLocaleString()} IQD</span>
           </div>
-
           {sonuc && (
-            <div
-              className={`text-sm mb-3 text-center font-medium ${
-                sonuc.startsWith("✓") ? "text-green-600" : "text-red-500"
-              }`}
-            >
+            <div className={`text-sm mb-3 text-center font-medium ${sonuc.startsWith("✓") ? "text-green-600" : "text-red-500"}`}>
               {sonuc}
             </div>
           )}
-
           <button
             onClick={siparisKaydet}
             disabled={sepet.length === 0 || kaydediliyor}
             className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
           >
-            {kaydediliyor ? "Kaydediliyor..." : "Siparişi Tamamla"}
+            {kaydediliyor ? t.kaydediliyor : t.siparisiTamamla}
           </button>
         </div>
       </div>
-
     </div>
   )
 }

@@ -3,19 +3,19 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useDil } from "../components/DilContext"
 
 export default function SiparislerPage() {
   const { status } = useSession()
   const router = useRouter()
+  const { t } = useDil()
   const [siparisler, setSiparisler] = useState([])
   const [secilenId, setSecilenId] = useState(null)
   const [kalemler, setKalemler] = useState([])
   const [yukleniyor, setYukleniyor] = useState(false)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/giris")
-    }
+    if (status === "unauthenticated") router.push("/giris")
   }, [status, router])
 
   useEffect(() => {
@@ -51,17 +51,17 @@ export default function SiparislerPage() {
   }
 
   if (status === "loading" || status === "unauthenticated") {
-    return <div className="p-8 text-gray-500">Yükleniyor...</div>
+    return <div className="p-8 text-gray-500">{t.yukleniyor}</div>
   }
 
   return (
     <div className="p-8 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-        Siparişler
+        {t.siparisler}
       </h1>
 
       {siparisler.length === 0 ? (
-        <p className="text-gray-500">Henüz sipariş yok.</p>
+        <p className="text-gray-500">{t.henuzSiparisYok}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {siparisler.map((siparis) => (
@@ -75,7 +75,7 @@ export default function SiparislerPage() {
               >
                 <div>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
-                    Sipariş #{siparis.id}
+                    {t.siparisNo}{siparis.id}
                   </span>
                   <span className="text-xs text-gray-500 ml-3">
                     {tarihFormat(siparis.created_at)}
@@ -94,7 +94,7 @@ export default function SiparislerPage() {
               {secilenId === siparis.id && (
                 <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
                   {yukleniyor ? (
-                    <p className="text-sm text-gray-500">Yükleniyor...</p>
+                    <p className="text-sm text-gray-500">{t.yukleniyor}</p>
                   ) : (
                     <div className="flex flex-col gap-2">
                       {kalemler.map((kalem, i) => (
@@ -104,9 +104,7 @@ export default function SiparislerPage() {
                         >
                           <span>
                             {kalem.urun_adi}
-                            <span className="text-gray-400 ml-1">
-                              × {kalem.adet}
-                            </span>
+                            <span className="text-gray-400 ml-1">× {kalem.adet}</span>
                           </span>
                           <span className="font-medium">
                             {kalem.fiyat * kalem.adet} IQD
@@ -114,7 +112,7 @@ export default function SiparislerPage() {
                         </div>
                       ))}
                       <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-1 flex justify-between text-sm font-bold text-gray-900 dark:text-gray-100">
-                        <span>Toplam</span>
+                        <span>{t.toplam}</span>
                         <span>{siparis.toplam} IQD</span>
                       </div>
                     </div>
