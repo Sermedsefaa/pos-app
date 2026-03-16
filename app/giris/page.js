@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useDil } from "../components/DilContext"
+import Link from "next/link"
 
 export default function GirisPage() {
   const { t } = useDil()
@@ -11,6 +12,8 @@ export default function GirisPage() {
   const [hata, setHata] = useState("")
   const [yukleniyor, setYukleniyor] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const kayitBasarili = searchParams.get("kayit") === "basarili"
 
   async function girisYap() {
     if (!form.username || !form.password) return
@@ -38,6 +41,15 @@ export default function GirisPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           {t.giris}
         </h1>
+
+        {kayitBasarili && (
+          <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4">
+            <p className="text-green-700 dark:text-green-300 text-sm font-medium">
+              ✓ Kayıt başarılı! Giriş yapabilirsiniz.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3">
           <input
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -53,7 +65,9 @@ export default function GirisPage() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             onKeyDown={(e) => e.key === "Enter" && girisYap()}
           />
+
           {hata && <p className="text-red-500 text-sm">{hata}</p>}
+
           <button
             onClick={girisYap}
             disabled={yukleniyor}
@@ -61,6 +75,13 @@ export default function GirisPage() {
           >
             {yukleniyor ? t.girisYapiliyor : t.giris}
           </button>
+
+          <p className="text-center text-sm text-gray-500">
+            Hesabın yok mu?{" "}
+            <Link href="/kayit" className="text-gray-900 dark:text-gray-100 font-medium hover:underline">
+              Kayıt Ol
+            </Link>
+          </p>
         </div>
       </div>
     </div>
