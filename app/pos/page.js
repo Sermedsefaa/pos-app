@@ -125,10 +125,10 @@ export default function PosPage() {
   }
 
   return (
-    <div className="flex gap-0 h-screen bg-[#080808]">
+    <div className="flex flex-col lg:flex-row gap-0 min-h-screen bg-[#080808]">
 
       {/* Sol: Ürünler */}
-      <div className="flex-1 flex flex-col p-6 border-r border-white/5">
+      <div className="flex-1 flex flex-col min-h-0 p-4 lg:p-6 lg:border-r border-white/5">
 
         {/* Masa seçimi */}
         {masalar.length > 0 && (
@@ -185,7 +185,7 @@ export default function PosPage() {
         </div>
 
         {/* Ürün grid */}
-        <div className="grid grid-cols-2 gap-3 overflow-y-auto flex-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 overflow-y-auto flex-1">
           {filtreliUrunler.map((urun) => (
             <button
               key={urun.id}
@@ -218,7 +218,7 @@ export default function PosPage() {
       </div>
 
       {/* Sağ: Sepet */}
-      <div className="w-80 flex flex-col p-6">
+      <div className="w-full lg:w-80 flex flex-col p-4 lg:p-6 border-t lg:border-t-0 lg:border-l border-white/5">
 
         <div className="flex justify-between items-center mb-4">
           <div>

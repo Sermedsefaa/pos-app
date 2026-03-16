@@ -3,104 +3,96 @@
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { useDil } from "./DilContext"
-import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 export default function Navbar() {
   const { data: session } = useSession()
   const { dil, setDil, t } = useDil()
-  const pathname = usePathname()
-  
+  const [menuAcik, setMenuAcik] = useState(false)
 
-  // Giriş yapılmamış — landing navbar
-  if (!session) {
-    return (
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5 bg-[#080808]">
-        <Link href="/">
-          <img src="/logo.png" alt="Logo" style={{ height: "30px", width: "auto" }} />
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link href="/fiyatlar" className="text-white/50 hover:text-white text-sm transition-colors">
-            Fiyatlar
-          </Link>
+  return (
+    <nav className="bg-gray-900 text-white" dir={dil === "ar" ? "rtl" : "ltr"}>
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <img src="/logo.png" alt="Logo" style={{ height: "36px", width: "auto" }} />
+          {/* Masaüstü linkler */}
+          <div className="hidden md:flex gap-6">
+            <Link href="/" className="hover:text-gray-300">{t.anaSayfa}</Link>
+            <Link href="/pos" className="hover:text-gray-300">{t.pos}</Link>
+            <Link href="/urunler" className="hover:text-gray-300">{t.urunler}</Link>
+            <Link href="/siparisler" className="hover:text-gray-300">{t.siparisler}</Link>
+            {session?.user?.rol === "sahip" && (
+              <Link href="/kullanicilar" className="hover:text-gray-300">
+                Kullanıcılar
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setDil(dil === "tr" ? "ar" : "tr")}
-            className="text-xs border border-white/10 rounded-lg px-3 py-1.5 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+            className="text-xs border border-gray-600 rounded-lg px-3 py-1.5 hover:border-gray-400 transition-colors"
           >
             {dil === "tr" ? "العربية" : "Türkçe"}
           </button>
-          <Link href="/giris" className="text-white/50 hover:text-white text-sm transition-colors">
-            {t.girisYap}
-          </Link>
-          <Link
-            href="/kayit"
-            className="bg-white text-black text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/90 transition-colors"
+
+          {/* Masaüstü çıkış */}
+          <div className="hidden md:block">
+            {session ? (
+              <button
+                onClick={() => signOut({ callbackUrl: "/giris" })}
+                className="text-gray-300 hover:text-white text-sm"
+              >
+                {t.cikisYap}
+              </button>
+            ) : (
+              <Link href="/giris" className="text-gray-300 hover:text-white text-sm">
+                {t.girisYap}
+              </Link>
+            )}
+          </div>
+
+          {/* Mobil hamburger */}
+          <button
+            onClick={() => setMenuAcik(!menuAcik)}
+            className="md:hidden flex flex-col gap-1.5 p-1"
           >
-            Ücretsiz Başla
-          </Link>
-          <Link href="/iletisim" className="text-white/50 hover:text-white text-sm transition-colors">
-  Demo
-</Link>
+            <span className={`block w-6 h-0.5 bg-white transition-transform ${menuAcik ? "rotate-45 translate-y-2" : ""}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-opacity ${menuAcik ? "opacity-0" : ""}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-transform ${menuAcik ? "-rotate-45 -translate-y-2" : ""}`} />
+          </button>
         </div>
-      </nav>
-    )
-  }
+      </div>
 
-  // Giriş yapılmış — uygulama navbar'ı
-const linkler = [
-  { href: "/dashboard", label: t.anaSayfa },
-  { href: "/pos", label: t.pos },
-  { href: "/urunler", label: t.urunler },
-  { href: "/siparisler", label: t.siparisler },
-  { href: "/rapor", label: "Rapor" },
-  { href: "/masalar", label: "Masalar" },
-  ...(session?.user?.rol === "sahip"
-    ? [{ href: "/kullanicilar", label: t.kullanicilar }]
-    : []),
-]
-
-
-  return (
-    <nav className="border-b border-white/5 bg-[#080808] px-6 py-3 flex items-center justify-between">
-      <div className="flex items-center gap-8">
-        <Link href="/dashboard">
-          <img src="/logo.png" alt="Logo" style={{ height: "28px", width: "auto" }} />
-        </Link>
-        <div className="flex gap-1">
-          {linkler.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                pathname === link.href
-                  ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {link.label}
+      {/* Mobil menü */}
+      {menuAcik && (
+        <div className="md:hidden border-t border-gray-700 px-4 pb-4 flex flex-col gap-3">
+          <Link href="/" onClick={() => setMenuAcik(false)} className="hover:text-gray-300 py-2">{t.anaSayfa}</Link>
+          <Link href="/pos" onClick={() => setMenuAcik(false)} className="hover:text-gray-300 py-2">{t.pos}</Link>
+          <Link href="/urunler" onClick={() => setMenuAcik(false)} className="hover:text-gray-300 py-2">{t.urunler}</Link>
+          <Link href="/siparisler" onClick={() => setMenuAcik(false)} className="hover:text-gray-300 py-2">{t.siparisler}</Link>
+          {session?.user?.rol === "sahip" && (
+            <Link href="/kullanicilar" onClick={() => setMenuAcik(false)} className="hover:text-gray-300 py-2">
+              Kullanıcılar
             </Link>
-          ))}
+          )}
+          <div className="border-t border-gray-700 pt-3">
+            {session ? (
+              <button
+                onClick={() => signOut({ callbackUrl: "/giris" })}
+                className="text-gray-300 hover:text-white text-sm"
+              >
+                {t.cikisYap}
+              </button>
+            ) : (
+              <Link href="/giris" className="text-gray-300 hover:text-white text-sm">
+                {t.girisYap}
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        {session && (
-          <span className="text-xs text-white/20 hidden md:block font-mono">
-            {session.user.isletmeAdi}
-          </span>
-        )}
-        <button
-          onClick={() => setDil(dil === "tr" ? "ar" : "tr")}
-          className="text-xs border border-white/10 rounded-lg px-3 py-1.5 text-white/40 hover:text-white hover:border-white/20 transition-colors"
-        >
-          {dil === "tr" ? "العربية" : "Türkçe"}
-        </button>
-        <button
-          onClick={() => signOut({ callbackUrl: "/giris" })}
-          className="text-xs text-white/30 hover:text-white transition-colors"
-        >
-          {t.cikisYap}
-        </button>
-      </div>
+      )}
     </nav>
   )
 }

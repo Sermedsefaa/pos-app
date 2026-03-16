@@ -70,7 +70,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#080808] p-8" dir={rtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#080808] p-4 md:p-8" dir={rtl ? "rtl" : "ltr"}>
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -91,7 +91,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-8 max-w-3xl">
+      <div className="grid grid-cols-2 gap-3 mb-8 w-full max-w-3xl">
         {statlar.map((stat, i) => (
           <div
             key={i}
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 max-w-3xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
         {veri?.dusukStok?.length > 0 && (
           <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
             <div className="flex items-center gap-2 mb-4">

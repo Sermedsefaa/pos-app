@@ -36,7 +36,7 @@ function GirisFormu() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm px-4">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Logo" className="h-12 mx-auto mb-4" />
           <h1 className="text-2xl font-semibold text-white">{t.giris}</h1>

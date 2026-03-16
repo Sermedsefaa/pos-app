@@ -71,7 +71,7 @@ export default function KullanicilarPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 md:p-8 w-full max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
         Kullanıcılar
       </h1>
