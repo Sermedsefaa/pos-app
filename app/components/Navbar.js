@@ -36,6 +36,9 @@ export default function Navbar() {
           >
             Ücretsiz Başla
           </Link>
+          <Link href="/iletisim" className="text-white/50 hover:text-white text-sm transition-colors">
+  Demo
+</Link>
         </div>
       </nav>
     )

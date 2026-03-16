@@ -72,20 +72,27 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
-
-      {/* CTA */}
-      <div className="max-w-2xl mx-auto px-8 py-16 text-center">
-        <div className="rounded-3xl border border-white/10 bg-white/3 p-12">
-          <h2 className="text-3xl font-bold mb-4">Hemen başlayın</h2>
-          <p className="text-white/40 mb-8">Kredi kartı gerekmez. 5 dakikada kurulum.</p>
-          <Link
-            href="/kayit"
-            className="inline-block bg-white text-black font-medium px-8 py-3.5 rounded-xl hover:bg-white/90 transition-all text-sm"
-          >
-            Ücretsiz Hesap Oluştur →
-          </Link>
-        </div>
-      </div>
+{/* CTA */}
+<div className="max-w-2xl mx-auto px-8 py-16 text-center">
+  <div className="rounded-3xl border border-white/10 bg-white/3 p-12">
+    <h2 className="text-3xl font-bold mb-4">Hemen başlayın</h2>
+    <p className="text-white/40 mb-8">Kredi kartı gerekmez. 5 dakikada kurulum.</p>
+    <div className="flex items-center justify-center gap-4">
+      <Link
+        href="/kayit"
+        className="inline-block bg-white text-black font-medium px-8 py-3.5 rounded-xl hover:bg-white/90 transition-all text-sm"
+      >
+        Ücretsiz Hesap Oluştur →
+      </Link>
+      <Link
+        href="/iletisim"
+        className="inline-block border border-white/10 text-white/60 hover:text-white hover:border-white/20 font-medium px-8 py-3.5 rounded-xl transition-all text-sm"
+      >
+        Demo Talep Et
+      </Link>
+    </div>
+  </div>
+</div>
 
       {/* Footer */}
       <div className="border-t border-white/5 px-8 py-6 flex items-center justify-between max-w-5xl mx-auto">
