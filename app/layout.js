@@ -5,8 +5,8 @@ import MainLayout from "./components/MainLayout"
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="tr">
-      <body>
+    <html lang="tr" className="dark">
+      <body className="bg-gray-950 text-gray-100 min-h-screen">
         <Providers>
           <DilProvider>
             <MainLayout>

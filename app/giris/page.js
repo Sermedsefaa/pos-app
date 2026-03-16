@@ -31,54 +31,57 @@ export default function GirisPage() {
     } else {
       setHata(t.hataliGiris)
     }
-
     setYukleniyor(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          {t.giris}
-        </h1>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <img src="/logo.png" alt="Logo" className="h-12 mx-auto mb-4" />
+          <h1 className="text-2xl font-semibold text-white">{t.giris}</h1>
+          <p className="text-gray-500 text-sm mt-1">Hesabınıza giriş yapın</p>
+        </div>
 
-        {kayitBasarili && (
-          <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4">
-            <p className="text-green-700 dark:text-green-300 text-sm font-medium">
-              ✓ Kayıt başarılı! Giriş yapabilirsiniz.
-            </p>
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          {kayitBasarili && (
+            <div className="bg-green-950 border border-green-800 rounded-xl p-3 mb-4">
+              <p className="text-green-400 text-sm">✓ Kayıt başarılı, giriş yapabilirsiniz.</p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <input
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 text-sm focus:border-gray-500"
+              placeholder={t.kullaniciAdi}
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
+            <input
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 text-sm"
+              placeholder={t.sifre}
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && girisYap()}
+            />
+
+            {hata && (
+              <p className="text-red-400 text-sm">{hata}</p>
+            )}
+
+            <button
+              onClick={girisYap}
+              disabled={yukleniyor}
+              className="w-full bg-white text-black rounded-xl p-3 text-sm font-medium hover:bg-gray-100 disabled:opacity-40 transition-all mt-1"
+            >
+              {yukleniyor ? t.girisYapiliyor : t.giris}
+            </button>
           </div>
-        )}
 
-        <div className="flex flex-col gap-3">
-          <input
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            placeholder={t.kullaniciAdi}
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
-          <input
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            placeholder={t.sifre}
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            onKeyDown={(e) => e.key === "Enter" && girisYap()}
-          />
-
-          {hata && <p className="text-red-500 text-sm">{hata}</p>}
-
-          <button
-            onClick={girisYap}
-            disabled={yukleniyor}
-            className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
-          >
-            {yukleniyor ? t.girisYapiliyor : t.giris}
-          </button>
-
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 mt-4">
             Hesabın yok mu?{" "}
-            <Link href="/kayit" className="text-gray-900 dark:text-gray-100 font-medium hover:underline">
+            <Link href="/kayit" className="text-white hover:underline">
               Kayıt Ol
             </Link>
           </p>
