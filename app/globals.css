@@ -23,6 +23,39 @@ input:focus, select:focus {
   }
   .no-print { display: none !important; }
 }
+@media print {
+  body * { visibility: hidden; }
+  #fis, #fis * { visibility: visible; }
+  #fis {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80mm;
+  }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  #rapor-icerik {
+    visibility: visible !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: white !important;
+  }
+
+  #rapor-icerik * {
+    visibility: visible !important;
+    color: #111 !important;
+    background: white !important;
+    border-color: #ddd !important;
+  }
+
+  #rapor-icerik .tabular-nums {
+    color: #111 !important;
+  }
+}
 
 :root {
   --background: oklch(1 0 0);

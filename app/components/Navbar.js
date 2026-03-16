@@ -9,6 +9,7 @@ export default function Navbar() {
   const { data: session } = useSession()
   const { dil, setDil, t } = useDil()
   const pathname = usePathname()
+  
 
   // Giriş yapılmamış — landing navbar
   if (!session) {
@@ -45,15 +46,16 @@ export default function Navbar() {
   }
 
   // Giriş yapılmış — uygulama navbar'ı
-  const linkler = [
-    { href: "/dashboard", label: t.anaSayfa },
-    { href: "/pos", label: t.pos },
-    { href: "/urunler", label: t.urunler },
-    { href: "/siparisler", label: t.siparisler },
-    ...(session?.user?.rol === "sahip"
-      ? [{ href: "/kullanicilar", label: t.kullanicilar }]
-      : []),
-  ]
+ const linkler = [
+  { href: "/dashboard", label: t.anaSayfa },
+  { href: "/pos", label: t.pos },
+  { href: "/urunler", label: t.urunler },
+  { href: "/siparisler", label: t.siparisler },
+  { href: "/rapor", label: "Rapor" },
+  ...(session?.user?.rol === "sahip"
+    ? [{ href: "/kullanicilar", label: t.kullanicilar }]
+    : []),
+]
 
   return (
     <nav className="border-b border-white/5 bg-[#080808] px-6 py-3 flex items-center justify-between">
