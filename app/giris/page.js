@@ -27,8 +27,8 @@ export default function GirisPage() {
     })
 
     if (sonuc.ok) {
-      router.push("/pos")
-    } else {
+  router.push("/dashboard")
+} else {
       setHata(t.hataliGiris)
     }
     setYukleniyor(false)

@@ -43,6 +43,11 @@ const ar = {
   henuzSiparisYok: "لا توجد طلبات بعد.",
   eminMisin: "هل أنت متأكد من حذف هذا المنتج؟",
   sepetTemizle: "هل تريد مسح السلة؟",
+  kullanicilar: "المستخدمون",
+dusukStok: "مخزون منخفض",
+dusukStokUyarisi: "تحذير مخزون منخفض",
+canli: "مباشر",
+adet2: "قطعة",
 }
 
 export default ar

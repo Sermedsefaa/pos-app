@@ -43,6 +43,12 @@ const tr = {
   henuzSiparisYok: "Henüz sipariş yok.",
   eminMisin: "Bu ürünü silmek istediğine emin misin?",
   sepetTemizle: "Sepeti temizlemek istediğine emin misin?",
+  kullanicilar: "Kullanıcılar",
+dusukStok: "Düşük Stok",
+dusukStokUyarisi: "Düşük Stok Uyarısı",
+canli: "Canlı",
+adet2: "adet",
+
 }
 
 export default tr

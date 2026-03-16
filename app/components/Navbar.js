@@ -11,12 +11,12 @@ export default function Navbar() {
   const pathname = usePathname()
 
   const linkler = [
-    { href: "/", label: t.anaSayfa },
+   { href: "/dashboard", label: t.anaSayfa },
     { href: "/pos", label: t.pos },
     { href: "/urunler", label: t.urunler },
     { href: "/siparisler", label: t.siparisler },
     ...(session?.user?.rol === "sahip"
-      ? [{ href: "/kullanicilar", label: "Kullanıcılar" }]
+      ? [{ href: "/kullanicilar", label: t.Kullanıcılar }]
       : []),
   ]
 
