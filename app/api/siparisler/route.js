@@ -16,27 +16,26 @@ export async function GET() {
   if (error) return Response.json({ hata: error.message }, { status: 500 })
   return Response.json(data)
 }
-
 export async function POST(request) {
   const session = await getServerSession(authOptions)
   if (!session) return Response.json({ hata: "Yetkisiz" }, { status: 401 })
 
   const body = await request.json()
 
-  // Siparişi kaydet
   const { data: siparis, error: siparisHata } = await supabase
     .from("siparisler")
     .insert([{
       toplam: body.toplam,
       notlar: body.notlar || "",
       isletme_id: session.user.isletmeId,
+      masa_id: body.masa_id || null,
+      masa_numara: body.masa_numara || null,
     }])
     .select()
     .single()
 
   if (siparisHata) return Response.json({ hata: siparisHata.message }, { status: 500 })
 
-  // Kalemleri kaydet
   const kalemler = body.kalemler.map((k) => ({
     siparis_id: siparis.id,
     urun_id: k.id,
@@ -57,6 +56,14 @@ export async function POST(request) {
       urun_id: kalem.id,
       miktar: kalem.adet,
     })
+  }
+
+  // Masayı dolu yap
+  if (body.masa_id) {
+    await supabase
+      .from("masalar")
+      .update({ durum: "dolu" })
+      .eq("id", body.masa_id)
   }
 
   return Response.json(siparis, { status: 201 })

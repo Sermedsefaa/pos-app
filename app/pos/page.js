@@ -4,18 +4,24 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useDil } from "../components/DilContext"
+import Fis from "../components/Fis"
 
 export default function PosPage() {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const { t } = useDil()
   const [urunler, setUrunler] = useState([])
+  const [masalar, setMasalar] = useState([])
+  const [secilenMasa, setSecilenMasa] = useState(null)
   const [sepet, setSepet] = useState([])
   const [kaydediliyor, setKaydediliyor] = useState(false)
   const [sonuc, setSonuc] = useState(null)
   const [secilenKategori, setSecilenKategori] = useState("Tümü")
   const [odemeModal, setOdemeModal] = useState(false)
   const [alinanPara, setAlinanPara] = useState("")
+  const [fisModal, setFisModal] = useState(false)
+  const [sonSiparis, setSonSiparis] = useState(null)
+  const [sonKalemler, setSonKalemler] = useState([])
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/giris")
@@ -25,9 +31,11 @@ export default function PosPage() {
     if (status === "authenticated") {
       fetch("/api/urunler")
         .then((r) => r.json())
-        .then((data) => {
-          if (Array.isArray(data)) setUrunler(data)
-        })
+        .then((data) => { if (Array.isArray(data)) setUrunler(data) })
+
+      fetch("/api/masalar")
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data)) setMasalar(data) })
     }
   }, [status])
 
@@ -69,46 +77,97 @@ export default function PosPage() {
   }
 
   const toplam = sepet.reduce((acc, k) => acc + k.fiyat * k.adet, 0)
-  const paraUstu = alinanPara ? Number(alinanPara) - toplam : 0
 
   async function siparisKaydet() {
     if (sepet.length === 0) return
     if (Number(alinanPara) < toplam) return
-
     setKaydediliyor(true)
-    setSonuc(null)
 
     const res = await fetch("/api/siparisler", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ toplam, kalemler: sepet }),
+      body: JSON.stringify({
+        toplam,
+        kalemler: sepet,
+        masa_id: secilenMasa?.id || null,
+        masa_numara: secilenMasa?.numara || null,
+      }),
     })
 
     if (res.ok) {
+      const kaydedilenSiparis = await res.json()
+      setSonSiparis(kaydedilenSiparis)
+      setSonKalemler(sepet.map((k) => ({
+        urun_adi: k.ad,
+        fiyat: k.fiyat,
+        adet: k.adet,
+      })))
       setSepet([])
       setOdemeModal(false)
-      setAlinanPara("")
+      setFisModal(true)
       setSonuc(t.siparisKaydedildi)
+
+      // Masaları yenile
+      fetch("/api/masalar")
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data)) setMasalar(data) })
+
+      setTimeout(() => setSonuc(null), 3000)
     } else {
       setSonuc(t.hataOlustu)
     }
 
     setKaydediliyor(false)
-    setTimeout(() => setSonuc(null), 3000)
   }
 
   if (status === "loading" || status === "unauthenticated") {
-    return <div className="p-8 text-gray-500">{t.yukleniyor}</div>
+    return <div className="p-8 text-white/40">{t.yukleniyor}</div>
   }
 
   return (
-    <div className="flex gap-6 h-screen p-6">
+    <div className="flex gap-0 h-screen bg-[#080808]">
 
       {/* Sol: Ürünler */}
-      <div className="flex-1 flex flex-col">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-          {t.urunler}
-        </h2>
+      <div className="flex-1 flex flex-col p-6 border-r border-white/5">
+
+        {/* Masa seçimi */}
+        {masalar.length > 0 && (
+          <div className="mb-4">
+            <p className="text-white/30 text-xs font-mono uppercase tracking-wider mb-2">
+              Masa Seç
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setSecilenMasa(null)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  !secilenMasa
+                    ? "bg-white text-black"
+                    : "border border-white/10 text-white/40 hover:text-white"
+                }`}
+              >
+                Masasız
+              </button>
+              {masalar.map((masa) => (
+                <button
+                  key={masa.id}
+                  onClick={() => setSecilenMasa(masa)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    secilenMasa?.id === masa.id
+                      ? "bg-white text-black"
+                      : masa.durum === "dolu"
+                      ? "border border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                      : "border border-white/10 text-white/40 hover:text-white"
+                  }`}
+                >
+                  {masa.numara}
+                  {masa.durum === "dolu" && " ●"}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Kategori filtresi */}
         <div className="flex gap-2 mb-4 flex-wrap">
           {kategoriler.map((kategori) => (
             <button
@@ -116,60 +175,62 @@ export default function PosPage() {
               onClick={() => setSecilenKategori(kategori)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 secilenKategori === kategori
-                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
-                  : "border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  ? "bg-white text-black"
+                  : "border border-white/10 text-white/40 hover:text-white"
               }`}
             >
               {kategori}
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-3 overflow-y-auto">
-         {filtreliUrunler.map((urun) => (
-  <button
-    key={urun.id}
-    onClick={() => urun.stok !== 0 && sepeteEkle(urun)}
-    disabled={urun.stok === 0}
-    className={`border rounded-xl p-4 text-left transition-all ${
-      urun.stok === 0
-        ? "border-gray-100 dark:border-gray-800 opacity-40 cursor-not-allowed"
-        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95"
-    }`}
-  >
-    <div className="font-medium text-gray-900 dark:text-gray-100">
-      {urun.ad}
-    </div>
-    {urun.kategori && (
-      <div className="text-xs text-gray-400 mt-0.5">{urun.kategori}</div>
-    )}
-    <div className="flex justify-between items-center mt-1">
-      <span className="text-gray-600 dark:text-gray-400 font-medium">
-        {urun.fiyat} IQD
-      </span>
-      {urun.stok !== 999 && (
-        <span className={`text-xs ${
-          urun.stok === 0 ? "text-red-500" :
-          urun.stok <= 5 ? "text-amber-500" : "text-gray-400"
-        }`}>
-          {urun.stok === 0 ? "Tükendi" : `${urun.stok} adet`}
-        </span>
-      )}
-    </div>
-  </button>
-))}
+
+        {/* Ürün grid */}
+        <div className="grid grid-cols-2 gap-3 overflow-y-auto flex-1">
+          {filtreliUrunler.map((urun) => (
+            <button
+              key={urun.id}
+              onClick={() => urun.stok !== 0 && sepeteEkle(urun)}
+              disabled={urun.stok === 0}
+              className={`border rounded-xl p-4 text-left transition-all ${
+                urun.stok === 0
+                  ? "border-white/5 opacity-30 cursor-not-allowed"
+                  : "border-white/10 hover:bg-white/5 active:scale-95"
+              }`}
+            >
+              <div className="font-medium text-white text-sm">{urun.ad}</div>
+              {urun.kategori && (
+                <div className="text-xs text-white/30 mt-0.5">{urun.kategori}</div>
+              )}
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-white/60 text-sm font-mono">{urun.fiyat} IQD</span>
+                {urun.stok !== 999 && (
+                  <span className={`text-xs ${
+                    urun.stok === 0 ? "text-red-400" :
+                    urun.stok <= 5 ? "text-amber-400" : "text-white/20"
+                  }`}>
+                    {urun.stok === 0 ? "Tükendi" : `${urun.stok}`}
+                  </span>
+                )}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Sağ: Sepet */}
-      <div className="w-80 border-l border-gray-200 dark:border-gray-700 pl-6 flex flex-col">
+      <div className="w-80 flex flex-col p-6">
+
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {t.sepet}
-          </h2>
+          <div>
+            <h2 className="font-bold text-white">{t.sepet}</h2>
+            {secilenMasa && (
+              <p className="text-xs text-white/30 mt-0.5">{secilenMasa.numara}</p>
+            )}
+          </div>
           {sepet.length > 0 && (
             <button
               onClick={sepetiBosalt}
-              className="text-xs text-red-400 hover:text-red-600"
+              className="text-xs text-red-400 hover:text-red-300"
             >
               {t.temizle}
             </button>
@@ -177,26 +238,24 @@ export default function PosPage() {
         </div>
 
         {sepet.length === 0 ? (
-          <p className="text-gray-400 text-sm">{t.henuzUrunYok}</p>
+          <p className="text-white/20 text-sm">{t.henuzUrunYok}</p>
         ) : (
           <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
             {sepet.map((kalem) => (
-              <div key={kalem.id} className="flex justify-between items-center">
+              <div key={kalem.id} className="flex justify-between items-center py-1">
                 <div>
-                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                    {kalem.ad}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {kalem.fiyat} IQD × {kalem.adet}
+                  <div className="font-medium text-sm text-white">{kalem.ad}</div>
+                  <div className="text-xs text-white/30">
+                    {kalem.fiyat} × {kalem.adet}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                    {kalem.fiyat * kalem.adet} IQD
+                  <span className="font-medium text-sm text-white/70 font-mono">
+                    {kalem.fiyat * kalem.adet}
                   </span>
                   <button
                     onClick={() => sepettenCikar(kalem.id)}
-                    className="text-red-400 hover:text-red-600 text-lg leading-none"
+                    className="text-red-400 hover:text-red-300 text-lg leading-none w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-500/10"
                   >
                     −
                   </button>
@@ -206,15 +265,15 @@ export default function PosPage() {
           </div>
         )}
 
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-          <div className="flex justify-between font-bold text-lg mb-4 text-gray-900 dark:text-gray-100">
+        <div className="border-t border-white/5 pt-4 mt-4">
+          <div className="flex justify-between font-bold text-lg mb-4 text-white">
             <span>{t.toplam}</span>
-            <span>{toplam.toLocaleString()} IQD</span>
+            <span className="font-mono">{toplam.toLocaleString()} IQD</span>
           </div>
 
           {sonuc && (
             <div className={`text-sm mb-3 text-center font-medium ${
-              sonuc.startsWith("✓") ? "text-green-600" : "text-red-500"
+              sonuc.startsWith("✓") ? "text-emerald-400" : "text-red-400"
             }`}>
               {sonuc}
             </div>
@@ -223,7 +282,7 @@ export default function PosPage() {
           <button
             onClick={() => setOdemeModal(true)}
             disabled={sepet.length === 0}
-            className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl p-3 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
+            className="w-full bg-white text-black rounded-xl p-3 font-medium hover:bg-white/90 disabled:opacity-20 transition-all text-sm"
           >
             {t.siparisiTamamla}
           </button>
@@ -232,63 +291,74 @@ export default function PosPage() {
 
       {/* Ödeme Modalı */}
       {odemeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
-              Ödeme Al
-            </h3>
-
-            <div className="flex justify-between mb-4 text-gray-700 dark:text-gray-300">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 w-full max-w-sm mx-4">
+            <h3 className="text-lg font-bold mb-1 text-white">Ödeme Al</h3>
+            {secilenMasa && (
+              <p className="text-white/30 text-xs mb-4">{secilenMasa.numara}</p>
+            )}
+            <div className="flex justify-between mb-4 text-white/60">
               <span>Tutar</span>
-              <span className="font-bold">{toplam.toLocaleString()} IQD</span>
+              <span className="font-bold text-white font-mono">{toplam.toLocaleString()} IQD</span>
             </div>
-
             <input
-              className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-lg mb-3"
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder-white/20 text-lg mb-3 outline-none focus:border-white/20 font-mono"
               placeholder="Alınan para"
               type="number"
               value={alinanPara}
               onChange={(e) => setAlinanPara(e.target.value)}
               autoFocus
             />
-
             {alinanPara && Number(alinanPara) >= toplam && (
-              <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4 flex justify-between">
-                <span className="text-green-700 dark:text-green-300 font-medium">
-                  Para üstü
-                </span>
-                <span className="text-green-700 dark:text-green-300 font-bold">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-4 flex justify-between">
+                <span className="text-emerald-400 font-medium text-sm">Para üstü</span>
+                <span className="text-emerald-400 font-bold font-mono">
                   {(Number(alinanPara) - toplam).toLocaleString()} IQD
                 </span>
               </div>
             )}
-
             {alinanPara && Number(alinanPara) < toplam && (
-              <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-3 mb-4">
-                <span className="text-red-600 dark:text-red-300 text-sm">
-                  Yetersiz tutar — {(toplam - Number(alinanPara)).toLocaleString()} IQD eksik
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-4">
+                <span className="text-red-400 text-sm">
+                  Eksik — {(toplam - Number(alinanPara)).toLocaleString()} IQD
                 </span>
               </div>
             )}
-
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setOdemeModal(false)
-                  setAlinanPara("")
-                }}
-                className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => { setOdemeModal(false); setAlinanPara("") }}
+                className="flex-1 border border-white/10 rounded-xl p-3 text-white/40 hover:text-white text-sm transition-colors"
               >
-                İptal
+                {t.iptal}
               </button>
               <button
                 onClick={siparisKaydet}
                 disabled={!alinanPara || Number(alinanPara) < toplam || kaydediliyor}
-                className="flex-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg p-3 font-medium hover:opacity-80 disabled:opacity-40"
+                className="flex-1 bg-white text-black rounded-xl p-3 font-medium text-sm hover:bg-white/90 disabled:opacity-30"
               >
                 {kaydediliyor ? t.kaydediliyor : "Onayla"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fiş Modalı */}
+      {fisModal && sonSiparis && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 w-full max-w-sm mx-4">
+            <Fis
+              siparis={sonSiparis}
+              kalemler={sonKalemler}
+              isletmeAdi={session?.user?.isletmeAdi || ""}
+              alinanPara={alinanPara}
+            />
+            <button
+              onClick={() => { setFisModal(false); setAlinanPara("") }}
+              className="w-full mt-4 border border-white/10 rounded-xl p-3 text-white/40 hover:text-white text-sm transition-colors"
+            >
+              Kapat
+            </button>
           </div>
         </div>
       )}
