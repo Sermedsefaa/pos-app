@@ -125,23 +125,38 @@ export default function PosPage() {
           ))}
         </div>
         <div className="grid grid-cols-2 gap-3 overflow-y-auto">
-          {filtreliUrunler.map((urun) => (
-            <button
-              key={urun.id}
-              onClick={() => sepeteEkle(urun)}
-              className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all"
-            >
-              <div className="font-medium text-gray-900 dark:text-gray-100">
-                {urun.ad}
-              </div>
-              {urun.kategori && (
-                <div className="text-xs text-gray-400 mt-0.5">{urun.kategori}</div>
-              )}
-              <div className="text-gray-600 dark:text-gray-400 mt-1 font-medium">
-                {urun.fiyat} IQD
-              </div>
-            </button>
-          ))}
+         {filtreliUrunler.map((urun) => (
+  <button
+    key={urun.id}
+    onClick={() => urun.stok !== 0 && sepeteEkle(urun)}
+    disabled={urun.stok === 0}
+    className={`border rounded-xl p-4 text-left transition-all ${
+      urun.stok === 0
+        ? "border-gray-100 dark:border-gray-800 opacity-40 cursor-not-allowed"
+        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95"
+    }`}
+  >
+    <div className="font-medium text-gray-900 dark:text-gray-100">
+      {urun.ad}
+    </div>
+    {urun.kategori && (
+      <div className="text-xs text-gray-400 mt-0.5">{urun.kategori}</div>
+    )}
+    <div className="flex justify-between items-center mt-1">
+      <span className="text-gray-600 dark:text-gray-400 font-medium">
+        {urun.fiyat} IQD
+      </span>
+      {urun.stok !== 999 && (
+        <span className={`text-xs ${
+          urun.stok === 0 ? "text-red-500" :
+          urun.stok <= 5 ? "text-amber-500" : "text-gray-400"
+        }`}>
+          {urun.stok === 0 ? "Tükendi" : `${urun.stok} adet`}
+        </span>
+      )}
+    </div>
+  </button>
+))}
         </div>
       </div>
 

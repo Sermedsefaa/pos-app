@@ -30,10 +30,11 @@ export default function HomePage() {
   return (
     <div className="p-8 max-w-3xl" dir={rtl ? "rtl" : "ltr"}>
       <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">
-         {veri?.isletmeAdi} — {t.dashboard}
+        {veri?.isletmeAdi} — {t.dashboard}
       </h1>
 
-      <div className="grid grid-cols-2 gap-4 mb-10">
+      {/* Özet kartlar */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-6">
           <p className="text-sm text-gray-500 mb-1">{t.bugunCiro}</p>
           <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -60,6 +61,27 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Düşük stok uyarısı */}
+      {veri?.dusukStok?.length > 0 && (
+        <div className="border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 rounded-xl p-4 mb-6">
+          <h3 className="font-medium text-amber-800 dark:text-amber-300 mb-2">
+            ⚠ Düşük Stok Uyarısı
+          </h3>
+          <div className="flex flex-col gap-1">
+            {veri.dusukStok.map((u, i) => (
+              <div
+                key={i}
+                className="flex justify-between text-sm text-amber-700 dark:text-amber-400"
+              >
+                <span>{u.ad}</span>
+                <span>{u.stok} adet kaldı</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* En çok satanlar */}
       <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="font-bold text-lg mb-4 text-gray-900 dark:text-gray-100">
           {t.enCokSatanlar}

@@ -4,10 +4,8 @@ import { authOptions } from "@/lib/auth"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
- 
   if (!session) return Response.json({ hata: "Yetkisiz" }, { status: 401 })
 
- 
   const { data, error } = await supabase
     .from("urunler")
     .select("*")
@@ -31,6 +29,7 @@ export async function POST(request) {
       ad: body.ad,
       fiyat: body.fiyat,
       kategori: body.kategori,
+      stok: body.stok ? Number(body.stok) : 999,
       isletme_id: session.user.isletmeId,
     }])
     .select()
@@ -63,7 +62,12 @@ export async function PUT(request) {
 
   const { data, error } = await supabase
     .from("urunler")
-    .update({ ad: body.ad, fiyat: body.fiyat, kategori: body.kategori })
+    .update({
+      ad: body.ad,
+      fiyat: body.fiyat,
+      kategori: body.kategori,
+      stok: body.stok !== undefined ? Number(body.stok) : 999,
+    })
     .eq("id", body.id)
     .eq("isletme_id", session.user.isletmeId)
     .select()

@@ -27,6 +27,15 @@ export async function GET() {
     .select("urun_adi, adet, siparis_id, siparisler!inner(isletme_id)")
     .eq("siparisler.isletme_id", isletmeId)
 
+  const { data: dusukStok } = await supabase
+    .from("urunler")
+    .select("ad, stok")
+    .eq("isletme_id", isletmeId)
+    .eq("aktif", true)
+    .lt("stok", 6)
+    .gt("stok", 0)
+    .neq("stok", 999)
+
   const urunSayac = {}
   kalemler?.forEach((k) => {
     urunSayac[k.urun_adi] = (urunSayac[k.urun_adi] || 0) + k.adet
@@ -44,5 +53,6 @@ export async function GET() {
     toplamSiparisSayisi: tumSiparisler?.length || 0,
     enCokSatanlar,
     isletmeAdi: session.user.isletmeAdi,
+    dusukStok: dusukStok || [],
   })
 }

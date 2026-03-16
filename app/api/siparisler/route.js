@@ -23,6 +23,7 @@ export async function POST(request) {
 
   const body = await request.json()
 
+  // Siparişi kaydet
   const { data: siparis, error: siparisHata } = await supabase
     .from("siparisler")
     .insert([{
@@ -35,6 +36,7 @@ export async function POST(request) {
 
   if (siparisHata) return Response.json({ hata: siparisHata.message }, { status: 500 })
 
+  // Kalemleri kaydet
   const kalemler = body.kalemler.map((k) => ({
     siparis_id: siparis.id,
     urun_id: k.id,
@@ -48,5 +50,14 @@ export async function POST(request) {
     .insert(kalemler)
 
   if (kalemHata) return Response.json({ hata: kalemHata.message }, { status: 500 })
+
+  // Stokları düşür
+  for (const kalem of body.kalemler) {
+    await supabase.rpc("stok_dusur", {
+      urun_id: kalem.id,
+      miktar: kalem.adet,
+    })
+  }
+
   return Response.json(siparis, { status: 201 })
 }

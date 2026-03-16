@@ -10,7 +10,7 @@ export default function UrunlerPage() {
   const router = useRouter()
   const { t } = useDil()
   const [urunler, setUrunler] = useState([])
-  const [form, setForm] = useState({ ad: "", fiyat: "", kategori: "" })
+  const [form, setForm] = useState({ ad: "", fiyat: "", kategori: "", stok: "" })
   const [duzenle, setDuzenle] = useState(null)
   const [yukleniyor, setYukleniyor] = useState(false)
 
@@ -25,7 +25,7 @@ export default function UrunlerPage() {
   async function urunleriGetir() {
     const res = await fetch("/api/urunler")
     const data = await res.json()
-    setUrunler(data)
+    if (Array.isArray(data)) setUrunler(data)
   }
 
   async function urunEkle() {
@@ -36,7 +36,7 @@ export default function UrunlerPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     })
-    setForm({ ad: "", fiyat: "", kategori: "" })
+    setForm({ ad: "", fiyat: "", kategori: "", stok: "" })
     await urunleriGetir()
     setYukleniyor(false)
   }
@@ -64,6 +64,12 @@ export default function UrunlerPage() {
     setYukleniyor(false)
   }
 
+  function stokRengi(stok) {
+    if (stok === 0) return "text-red-500"
+    if (stok <= 5) return "text-amber-500"
+    return "text-green-600"
+  }
+
   if (status === "loading" || status === "unauthenticated") {
     return <div className="p-8 text-gray-500">{t.yukleniyor}</div>
   }
@@ -75,9 +81,7 @@ export default function UrunlerPage() {
       </h1>
 
       <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-8 flex flex-col gap-3">
-        <h2 className="font-medium text-gray-900 dark:text-gray-100">
-          {t.yeniUrunEkle}
-        </h2>
+        <h2 className="font-medium text-gray-900 dark:text-gray-100">{t.yeniUrunEkle}</h2>
         <input
           className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           placeholder={t.urunAdi}
@@ -96,6 +100,13 @@ export default function UrunlerPage() {
           placeholder={t.kategori}
           value={form.kategori}
           onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+        />
+        <input
+          className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          placeholder="Başlangıç stoğu (boş bırakılırsa sınırsız)"
+          type="number"
+          value={form.stok}
+          onChange={(e) => setForm({ ...form, stok: e.target.value })}
         />
         <button
           onClick={urunEkle}
@@ -130,6 +141,13 @@ export default function UrunlerPage() {
                   value={duzenle.kategori || ""}
                   onChange={(e) => setDuzenle({ ...duzenle, kategori: e.target.value })}
                 />
+                <input
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                  type="number"
+                  placeholder="Stok"
+                  value={duzenle.stok ?? ""}
+                  onChange={(e) => setDuzenle({ ...duzenle, stok: e.target.value })}
+                />
                 <div className="flex gap-2">
                   <button
                     onClick={urunGuncelle}
@@ -155,7 +173,12 @@ export default function UrunlerPage() {
                   {urun.kategori && (
                     <span className="text-xs text-gray-400 ml-2">{urun.kategori}</span>
                   )}
-                  <div className="text-sm text-gray-500 mt-0.5">{urun.fiyat} IQD</div>
+                  <div className="flex gap-3 mt-0.5">
+                    <span className="text-sm text-gray-500">{urun.fiyat} IQD</span>
+                    <span className={`text-sm font-medium ${stokRengi(urun.stok)}`}>
+                      Stok: {urun.stok === 999 ? "∞" : urun.stok}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
