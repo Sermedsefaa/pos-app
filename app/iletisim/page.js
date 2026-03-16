@@ -20,18 +20,7 @@ export default function IletisimPage() {
   return (
     <div className="min-h-screen bg-[#080808] text-white">
 
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-white/5">
-        <Link href="/">
-          <img src="/logo.png" alt="Logo" style={{ height: "32px" }} />
-        </Link>
-        <Link
-          href="/kayit"
-          className="bg-white text-black text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/90 transition-colors"
-        >
-          Ücretsiz Başla
-        </Link>
-      </nav>
+     
 
       <div className="max-w-lg mx-auto px-8 pt-20">
         <div className="text-center mb-10">
