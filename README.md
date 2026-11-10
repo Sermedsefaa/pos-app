@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🧾 Bulut Tabanlı Modern POS & Restoran Otomasyon Sistemi (`pos-app`)
 
-## Getting Started
+![POS App Preview](public/screenshots/preview.png)
 
-First, run the development server:
+Restoran, kafe ve perakende işletmeleri için kurulum gerektirmeden doğrudan tarayıcı üzerinden çalışan **bulut tabanlı POS (Point of Sale) ve işletme yönetim sistemi**. Hızlı sipariş alma, masa yönetimi, stok takibi, fiş yazdırma, satış raporları ve Türkçe / Arapça çoklu dil desteği sunar.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Öne Çıkan Özellikler
+
+- **⚡ Hızlı POS Ekranı (`/pos`):** Kategori bazlı ürün filtreleme, hızlı sepet yönetimi ve nakit / para üstü hesaplama.
+- **🪑 Masa Yönetimi (`/masalar`):** Restoran ve kafeler için anlık masa durumu ve adisyon takibi.
+- **📦 Ürün ve Stok Takibi (`/urunler`):** Ürün bazlı stok yönetimi, düşük stok uyarıları ve otomatik stok düşümü.
+- **🧾 Siparişler & Fiş Yazdırma (`/siparisler`):** Termal yazıcı uyumlu fiş çıktısı ve geçmiş sipariş takibi.
+- **📊 Yönetim Paneli & Raporlar (`/dashboard`, `/rapor`):** Günlük/aylık ciro, en çok satan ürünler ve performans analizleri.
+- **👥 Çoklu Kullanıcı & Rol Yönetimi (`/kullanicilar`):** Kasiyer, garson ve yönetici yetkilendirmesi (`NextAuth.js`).
+- **🌐 Çoklu Dil Desteği:** Türkçe ve Arapça (RTL) arayüz desteği.
+
+---
+
+## 🛠️ Kullanılan Teknolojiler
+
+| Kategori | Teknoloji |
+| :--- | :--- |
+| **Çatı (Framework)** | Next.js 16 (App Router & Turbopack), React 19 |
+| **Veritabanı & Backend** | Supabase (`@supabase/supabase-js`), Next.js API Routes |
+| **Kimlik Doğrulama** | NextAuth.js v4, bcryptjs |
+| **Stil & UI Bileşenleri** | Tailwind CSS v4, shadcn/ui, Radix UI, Lucide Icons |
+| **Derleyici & Araçlar** | React Compiler (`babel-plugin-react-compiler`), ESLint 9 |
+
+---
+
+## 📂 Proje Klasör Yapısı
+
+```text
+pos-app/
+├── app/
+│   ├── api/              # Kimlik doğrulama ve veri işlemleri için API rotaları
+│   ├── components/       # Sayfa içi özel bileşenler
+│   ├── dashboard/        # Yönetici özet paneli
+│   ├── fiyatlar/         # Abonelik ve paket fiyatlandırma sayfası
+│   ├── giris/ & kayit/   # Kullanıcı giriş ve kayıt ekranları
+│   ├── kullanicilar/     # Personel ve yetki yönetimi
+│   ├── locales/          # Türkçe ve Arapça dil dosyaları
+│   ├── masalar/          # Restoran masa düzeni ve adisyon takibi
+│   ├── pos/              # Hızlı satış (POS) terminali ekranı
+│   ├── rapor/            # Satış ve stok raporları
+│   ├── siparisler/       # Sipariş geçmişi ve yönetimi
+│   └── urunler/          # Ürün ve kategori yönetimi
+├── components/ui/        # Yeniden kullanılabilir shadcn/ui bileşenleri
+├── lib/                  # Supabase istemcisi ve yardımcı fonksiyonlar
+├── public/               # Statik varlıklar ve uygulama ekran görüntüleri
+│   └── screenshots/
+│       └── preview.png   # Uygulama önizleme görseli
+└── package.json          # Proje bağımlılıkları ve betikler
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🚀 Kurulum ve Çalıştırma
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Gereksinimler
 
-## Learn More
+- **Node.js:** `>= 18.x` (veya `20.x+`)
+- **npm**
+- **Supabase Projesi** (Veritabanı bağlantısı için)
 
-To learn more about Next.js, take a look at the following resources:
+### Adımlar
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Depoyu klonlayın:**
+   ```bash
+   git clone https://github.com/Sermedsefaa/pos-app.git
+   cd pos-app
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Bağımlılıkları yükleyin:**
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Ortam değişkenlerini yapılandırın:**
+   Proje kök dizininde `.env.local` dosyası oluşturun ve Supabase / NextAuth bilgilerinizi ekleyin:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXTAUTH_SECRET=your_nextauth_secret
+   NEXTAUTH_URL=http://localhost:3000
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Geliştirme sunucusunu başlatın:**
+   ```bash
+   npm run dev
+   ```
+   Tarayıcınızda `http://localhost:3000` adresini açarak uygulamaya erişebilirsiniz.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📄 Lisans
+
+Bu proje eğitim ve ticari portfolyo amaçlı geliştirilmiştir.
